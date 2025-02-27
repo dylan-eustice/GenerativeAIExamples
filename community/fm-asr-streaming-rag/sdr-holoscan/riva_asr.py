@@ -21,6 +21,7 @@ import riva.client
 import riva.client.proto.riva_asr_pb2 as rasr
 
 from queue import Queue
+from queue import Empty as QueueEmptyException
 from copy import deepcopy
 from common import setup_logging
 
@@ -41,6 +42,7 @@ class RivaThread(threading.Thread):
         self.database_uri = database_uri
         self.logger = setup_logging("riva_asr")
         self._prev_partial_transcript = None
+        self._buffer_get_timeout = 30  # (sec) timeout for waiting on new buffer entries
 
         # Riva handlers
         self._riva_auth = riva.client.Auth(uri=asr_uri)
@@ -153,7 +155,16 @@ class RivaThread(threading.Thread):
     def _request_generator(self):
         yield rasr.StreamingRecognizeRequest(streaming_config=self._riva_config)
         while not self._stop_generator:
-            yield rasr.StreamingRecognizeRequest(audio_content=self.buffer.get())
+            try:
+                yield rasr.StreamingRecognizeRequest(
+                    audio_content=self.buffer.get(timeout=self._buffer_get_timeout)
+                )
+            except QueueEmptyException:
+                # Timeout reached. If there is no timeout, the Riva gRPC connection
+                # seems to 'forget' about the StreamingRecognizeRequest and throws an
+                # error because the first request doesn't specify the START flag.
+                break
+
 
     def make_riva_request(self):
         self.logger.info("Creating gRPC stub with Riva client StreamingRecognize")
