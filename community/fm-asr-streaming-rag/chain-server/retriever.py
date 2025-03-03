@@ -54,12 +54,12 @@ class NVRetriever:
             logger.warning("Falling back to API Endpoint for Embedding model")
             logger.warning(f"Embedding NIM instance not found, using NVIDIA API endpoint ({e})")
             self.embed_client = get_embedder(local=False)
-        try:
-            self.rerank_client = get_reranker()
-        except requests.exceptions.ConnectionError as e:
-            logger.warning("Falling back to API Endpoint for Reranking model")
-            logger.warning(f"Reranking NIM instance not found, using NVIDIA API endpoint ({e})")
-            self.rerank_client = get_reranker(local=False)
+        # try:
+        #     self.rerank_client = get_reranker()
+        # except requests.exceptions.ConnectionError as e:
+        #     logger.warning("Falling back to API Endpoint for Reranking model")
+        #     logger.warning(f"Reranking NIM instance not found, using NVIDIA API endpoint ({e})")
+        #     self.rerank_client = get_reranker(local=False)
 
     def _create_collection(self, milvus_uri, db_name):
         """ Connect to standalone Milvus & create collection
@@ -202,10 +202,10 @@ class NVRetriever:
         if len(docs) == 0:
             return []
 
-        # Do reranking
-        docs = self._rerank_docs(docs, query)
-        if len(docs) > 5:
-            docs = self._drop_outliers(docs)
+        # # Do reranking
+        # docs = self._rerank_docs(docs, query)
+        # if len(docs) > 5:
+        #     docs = self._drop_outliers(docs)
 
         #todo Sort chronologically?
         return [self._reformat(doc) for doc in docs]

@@ -76,33 +76,33 @@ services:
               device_ids: ['${LLM_GPU:-1}']
               capabilities: [gpu]
 
-  rerank-nim:
-    container_name: rerank-nim
-    image: "nvcr.io/nim/${RERANK_MODEL}:${RERANK_VERSION}"
-    restart: "no"
+  # rerank-nim:
+  #   container_name: rerank-nim
+  #   image: "nvcr.io/nim/${RERANK_MODEL}:${RERANK_VERSION}"
+  #   restart: "no"
 
-    # Mount NIM cache
-    volumes:
-      - $HOME/.cache/nim:/opt/nim/.cache
+  #   # Mount NIM cache
+  #   volumes:
+  #     - $HOME/.cache/nim:/opt/nim/.cache
 
-    # Environment variables and command
-    environment:
-      NGC_API_KEY: ${NVIDIA_CLI_API_KEY?:source compose.env}
+  #   # Environment variables and command
+  #   environment:
+  #     NGC_API_KEY: ${NVIDIA_CLI_API_KEY?:source compose.env}
 
-    # Expose necessary ports
-    ports:
-      - "${RERANK_PORT}:8000"
+  #   # Expose necessary ports
+  #   ports:
+  #     - "${RERANK_PORT}:8000"
 
-    # Enable GPU usage
-    runtime: nvidia
-    shm_size: 16gb
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              device_ids: ['${RERANK_GPU:-0}']
-              capabilities: [gpu]
+  #   # Enable GPU usage
+  #   runtime: nvidia
+  #   shm_size: 16gb
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             device_ids: ['${RERANK_GPU:-0}']
+  #             capabilities: [gpu]
 
   embed-nim:
     container_name: embed-nim
